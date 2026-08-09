@@ -1,3 +1,50 @@
 spring:
   application:
     name: saga-manager
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9090/realms/poctime-app
+          jwk-set-uri: http://localhost:9090/realms/poctime-app/protocol/openid-connect/certs
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/saga
+    username: admin
+    password: admin@123
+    driver-class-name: org.postgresql.Driver
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
+    locations: classpath:db/migration
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: admin
+    password: admin@123
+    virtual-host: saga
+
+server:
+  port: 8282
+
+logging:
+  level:
+    root: INFO
+    org.springframework.amqp.rabbit.core.RabbitAdmin: DEBUG
+
+rabbitmq:
+  exchange-input: saga.input
+  exchange-output: saga.output
+  saga-queue: saga.queue
+  dlx-exchange: saga.error.input
+  dlx-queue: dlx.saga.queue
+  dlx-routing-key: saga.error
