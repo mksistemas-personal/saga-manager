@@ -1,12 +1,13 @@
 package app.mkiniz.sagamanager.shared.entity;
 
+import app.mkiniz.sagamanager.shared.security.SecurityUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @Getter
 @Setter
@@ -15,9 +16,18 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public abstract class AbstractAuditable {
 
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private ZonedDateTime createdAt;
+    private ZonedDateTime updatedAt;
     private String createdBy;
     private String updatedBy;
+
+    public void fillToCreate() {
+        String currentUser = SecurityUtils.getCurrentUserLogin().orElse("system");
+        createdAt = ZonedDateTime.now();
+        createdBy = currentUser;
+        updatedAt = ZonedDateTime.now();
+        updatedBy = currentUser;
+    }
+
 
 }

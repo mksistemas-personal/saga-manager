@@ -6,8 +6,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:9090/realms/poctime-app
-          jwk-set-uri: http://localhost:9090/realms/poctime-app/protocol/openid-connect/certs
+          issuer-uri: http://keycloak.local:9090/realms/saga-realm
+  #          jwk-set-uri: http://keycloak.local:9090/realms/saga-realm/protocol/openid-connect/certs
 
   data:
     redis:
@@ -40,6 +40,8 @@ logging:
   level:
     root: INFO
     org.springframework.amqp.rabbit.core.RabbitAdmin: DEBUG
+    org.springframework.security: DEBUG
+
 
 rabbitmq:
   exchange-input: saga.input
