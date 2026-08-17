@@ -45,6 +45,7 @@ class UpdateSagaService implements UpdateBusinessUseCase<Tsid, SagaRequest, Saga
     private Either<? extends BusinessException, Context> save(Context context) {
         context.saga.setName(context.request.name());
         context.saga.setDescription(context.request.description());
+        context.saga.fillToUpdate();
         context.saga = sagaRepository.save(context.saga);
         return Either.right(context);
     }

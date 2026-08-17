@@ -29,5 +29,11 @@ public abstract class AbstractAuditable {
         updatedBy = currentUser;
     }
 
+    public void fillToUpdate() {
+        String currentUser = SecurityUtils.getCurrentUserLogin().orElse("system");
+        updatedAt = ZonedDateTime.now();
+        updatedBy = currentUser;
+    }
+
 
 }
