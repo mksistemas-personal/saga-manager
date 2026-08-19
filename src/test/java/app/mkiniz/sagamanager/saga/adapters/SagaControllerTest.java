@@ -4,6 +4,7 @@ import app.mkiniz.sagamanager.saga.domain.Saga;
 import app.mkiniz.sagamanager.saga.domain.SagaRequest;
 import app.mkiniz.sagamanager.shared.business.AddBusinessUseCase;
 import app.mkiniz.sagamanager.shared.business.DeleteBusinessUseCase;
+import app.mkiniz.sagamanager.shared.business.GetByIdBusinessUseCase;
 import app.mkiniz.sagamanager.shared.business.UpdateBusinessUseCase;
 import com.github.f4b6a3.tsid.Tsid;
 import com.github.f4b6a3.tsid.TsidCreator;
@@ -23,6 +24,7 @@ class SagaControllerTest {
     private AddBusinessUseCase<SagaRequest, Saga> addSagaUseCase;
     private UpdateBusinessUseCase<Tsid, SagaRequest, Saga> updateSagaUseCase;
     private DeleteBusinessUseCase<Tsid, Saga> deleteSagaUseCase;
+    private GetByIdBusinessUseCase<Tsid, Saga> getByIdSagaUseCase;
     private SagaController sagaController;
 
     @BeforeEach
@@ -31,7 +33,8 @@ class SagaControllerTest {
         addSagaUseCase = mock(AddBusinessUseCase.class);
         updateSagaUseCase = mock(UpdateBusinessUseCase.class);
         deleteSagaUseCase = mock(DeleteBusinessUseCase.class);
-        sagaController = new SagaController(addSagaUseCase, updateSagaUseCase, deleteSagaUseCase);
+        getByIdSagaUseCase = mock(GetByIdBusinessUseCase.class);
+        sagaController = new SagaController(addSagaUseCase, updateSagaUseCase, deleteSagaUseCase, getByIdSagaUseCase);
     }
 
     @Test
@@ -78,12 +81,32 @@ class SagaControllerTest {
     }
 
     @Test
-    void shouldDeleteSagaAndReturnNoContent() {
+    void shouldDeleteSagaAndReturnOk() {
         Tsid id = TsidCreator.getTsid();
 
         ResponseEntity<Saga> response = sagaController.delete(id);
 
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
         verify(deleteSagaUseCase).execute(id);
+    }
+
+    @Test
+    void shouldGetSagaByIdAndReturnOk() {
+        Tsid id = TsidCreator.getTsid();
+        Saga saga = Saga.builder()
+                .id(id)
+                .name("Test Saga")
+                .description("Desc")
+                .build();
+        when(getByIdSagaUseCase.execute(id)).thenReturn(saga);
+
+        ResponseEntity<Saga> response = sagaController.getById(id);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(saga.getId(), response.getBody().getId());
+        assertEquals(saga.getName(), response.getBody().getName());
+        assertEquals(saga.getDescription(), response.getBody().getDescription());
+        verify(getByIdSagaUseCase).execute(id);
     }
 }

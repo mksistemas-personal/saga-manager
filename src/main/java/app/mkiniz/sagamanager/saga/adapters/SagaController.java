@@ -4,6 +4,7 @@ import app.mkiniz.sagamanager.saga.domain.Saga;
 import app.mkiniz.sagamanager.saga.domain.SagaRequest;
 import app.mkiniz.sagamanager.shared.business.AddBusinessUseCase;
 import app.mkiniz.sagamanager.shared.business.DeleteBusinessUseCase;
+import app.mkiniz.sagamanager.shared.business.GetByIdBusinessUseCase;
 import app.mkiniz.sagamanager.shared.business.UpdateBusinessUseCase;
 import com.github.f4b6a3.tsid.Tsid;
 import lombok.AllArgsConstructor;
@@ -20,6 +21,7 @@ public class SagaController {
     private final AddBusinessUseCase<SagaRequest, Saga> addSagaUseCase;
     private final UpdateBusinessUseCase<Tsid, SagaRequest, Saga> updateSagaUseCase;
     private final DeleteBusinessUseCase<Tsid, Saga> deleteSagaUseCase;
+    private final GetByIdBusinessUseCase<Tsid, Saga> getByIdSagaUseCase;
 
     @PostMapping
     public ResponseEntity<Saga> add(@RequestBody SagaRequest request) {
@@ -32,6 +34,12 @@ public class SagaController {
     @PutMapping("/{id}")
     public ResponseEntity<Saga> update(@PathVariable Tsid id, @RequestBody SagaRequest request) {
         Saga saga = updateSagaUseCase.execute(id, request);
+        return ResponseEntity.ok(saga);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Saga> getById(@PathVariable Tsid id) {
+        Saga saga = getByIdSagaUseCase.execute(id);
         return ResponseEntity.ok(saga);
     }
 

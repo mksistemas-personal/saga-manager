@@ -13,6 +13,6 @@ import java.util.List;
 @SuperBuilder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class Fork extends Step {
-    private List<Step> steps;
+public class CompositeStateStep extends StateStep {
+    private List<StateStep> steps;
 }

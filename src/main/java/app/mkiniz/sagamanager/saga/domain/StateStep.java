@@ -13,6 +13,9 @@ import java.util.List;
 @SuperBuilder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class Composite extends Step {
-    private List<Step> steps;
+public class StateStep {
+    private String id;
+    private String name;
+    private String description;
+    private List<String> events;
 }

@@ -8,8 +8,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
-import java.util.List;
-
 @Getter
 @Setter
 @SuperBuilder(toBuilder = true)
@@ -20,8 +18,7 @@ public class Saga extends AbstractAuditable {
     private String name;
     private String description;
     private boolean deleted;
+    private StateStep starterStep;
 
-    private Tsid FirstStepId;
-    private List<Step> steps;
 
 }
