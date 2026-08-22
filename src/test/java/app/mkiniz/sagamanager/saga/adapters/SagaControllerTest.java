@@ -2,14 +2,14 @@ package app.mkiniz.sagamanager.saga.adapters;
 
 import app.mkiniz.sagamanager.saga.domain.Saga;
 import app.mkiniz.sagamanager.saga.domain.SagaRequest;
-import app.mkiniz.sagamanager.shared.business.AddBusinessUseCase;
-import app.mkiniz.sagamanager.shared.business.DeleteBusinessUseCase;
-import app.mkiniz.sagamanager.shared.business.GetByIdBusinessUseCase;
-import app.mkiniz.sagamanager.shared.business.UpdateBusinessUseCase;
+import app.mkiniz.sagamanager.saga.domain.SagaSearchRequest;
+import app.mkiniz.sagamanager.shared.business.*;
 import com.github.f4b6a3.tsid.Tsid;
 import com.github.f4b6a3.tsid.TsidCreator;
+import cyclops.control.Maybe;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -25,6 +25,7 @@ class SagaControllerTest {
     private UpdateBusinessUseCase<Tsid, SagaRequest, Saga> updateSagaUseCase;
     private DeleteBusinessUseCase<Tsid, Saga> deleteSagaUseCase;
     private GetByIdBusinessUseCase<Tsid, Saga> getByIdSagaUseCase;
+    private GetAllBusinessUseCase<SagaSearchRequest, Maybe<Slice<Saga>>> getAllSagaUseCase;
     private SagaController sagaController;
 
     @BeforeEach
@@ -34,7 +35,8 @@ class SagaControllerTest {
         updateSagaUseCase = mock(UpdateBusinessUseCase.class);
         deleteSagaUseCase = mock(DeleteBusinessUseCase.class);
         getByIdSagaUseCase = mock(GetByIdBusinessUseCase.class);
-        sagaController = new SagaController(addSagaUseCase, updateSagaUseCase, deleteSagaUseCase, getByIdSagaUseCase);
+        getAllSagaUseCase = mock(GetAllBusinessUseCase.class);
+        sagaController = new SagaController(addSagaUseCase, updateSagaUseCase, deleteSagaUseCase, getByIdSagaUseCase, getAllSagaUseCase);
     }
 
     @Test
