@@ -1,5 +1,6 @@
 package app.mkiniz.sagamanager.adapters;
 
+import app.mkiniz.sagamanager.saga.adapters.SagaRepositoryDB;
 import app.mkiniz.sagamanager.saga.domain.Saga;
 import com.github.f4b6a3.tsid.TsidCreator;
 import org.junit.jupiter.api.Test;
@@ -12,7 +13,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import java.time.ZonedDateTime;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @JdbcTest
 @Import(SagaRepositoryDB.class)
@@ -41,7 +43,7 @@ class SagaRepositoryDBTest {
         sagaRepository.save(saga);
 
         Map<String, Object> result = jdbcTemplate.queryForMap("SELECT * FROM saga WHERE id = ?", saga.getId().toLong());
-        
+
         assertNotNull(result);
         assertEquals(saga.getId().toLong(), ((Number) result.get("id")).longValue());
         assertEquals("Test Saga", result.get("name"));

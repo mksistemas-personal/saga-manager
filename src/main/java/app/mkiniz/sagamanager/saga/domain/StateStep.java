@@ -1,5 +1,6 @@
 package app.mkiniz.sagamanager.saga.domain;
 
+import app.mkiniz.sagamanager.shared.entity.AbstractAuditable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,9 +14,10 @@ import java.util.List;
 @SuperBuilder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class StateStep {
+public class StateStep extends AbstractAuditable {
     private String id;
     private String name;
     private String description;
     private List<String> events;
+    private List<StateStep> connections;
 }
