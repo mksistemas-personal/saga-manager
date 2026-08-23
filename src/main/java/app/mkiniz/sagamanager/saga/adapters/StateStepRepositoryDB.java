@@ -1,5 +1,7 @@
 package app.mkiniz.sagamanager.saga.adapters;
 
+import app.mkiniz.sagamanager.saga.domain.CompositeStateStep;
+import app.mkiniz.sagamanager.saga.domain.SingleStateStep;
 import app.mkiniz.sagamanager.saga.domain.StateStep;
 import app.mkiniz.sagamanager.saga.domain.StateStepRepository;
 import com.github.f4b6a3.tsid.Tsid;
@@ -8,15 +10,26 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.Objects;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
 class StateStepRepositoryDB implements StateStepRepository {
 
-    private static final String EVENTS_SEPARATOR = "|";
+    private static final String EVENTS_SEPARATOR = "\\|";
+    private static final String EVENTS_JOIN_SEPARATOR = "|";
+
+    private static final String SQL_STATE_STEP = """
+            SELECT id, name, description, is_composite, deleted, events, created_at, updated_at, created_by, updated_by
+            FROM state_step
+            WHERE deleted = false
+            """;
 
     private final JdbcClient jdbcClient;
 
@@ -39,11 +52,16 @@ class StateStepRepositoryDB implements StateStepRepository {
 
         long idAsLong = Tsid.from(stateStep.getId()).toLong();
 
+        String eventsStr = null;
+        if (Objects.nonNull(stateStep.getEvents())) {
+            eventsStr = String.join(EVENTS_JOIN_SEPARATOR, stateStep.getEvents());
+        }
+
         jdbcClient.sql(sql)
                 .param(idAsLong)
                 .param(stateStep.getName())
                 .param(stateStep.getDescription())
-                .param(String.join(EVENTS_SEPARATOR, stateStep.getEvents()))
+                .param(eventsStr)
                 .param(toOffsetDateTime(stateStep.getCreatedAt()))
                 .param(toOffsetDateTime(stateStep.getUpdatedAt()))
                 .param(stateStep.getCreatedBy())
@@ -53,7 +71,42 @@ class StateStepRepositoryDB implements StateStepRepository {
         return stateStep;
     }
 
+    @Override
+    public Optional<StateStep> findById(Tsid id) {
+        String sql = SQL_STATE_STEP + " and id = :id";
+        return jdbcClient.sql(sql)
+                .param("id", id.toLong())
+                .query((rs, rowNum) -> translateStateStepFromQuery(rs))
+                .optional();
+    }
+
+    private static StateStep translateStateStepFromQuery(ResultSet rs) throws SQLException {
+        boolean isComposite = rs.getBoolean("is_composite");
+        String eventsStr = rs.getString("events");
+        java.util.List<String> events = null;
+        if (eventsStr != null && !eventsStr.isEmpty()) {
+            events = Arrays.asList(eventsStr.split(EVENTS_SEPARATOR));
+        }
+
+        StateStep.StateStepBuilder<?, ?> builder = isComposite ? CompositeStateStep.builder() : SingleStateStep.builder();
+
+        return builder
+                .id(Tsid.from(rs.getLong("id")).toString())
+                .name(rs.getString("name"))
+                .description(rs.getString("description"))
+                .events(events)
+                .createdAt(toZonedDateTime(rs.getObject("created_at", OffsetDateTime.class)))
+                .updatedAt(toZonedDateTime(rs.getObject("updated_at", OffsetDateTime.class)))
+                .createdBy(rs.getString("created_by"))
+                .updatedBy(rs.getString("updated_by"))
+                .build();
+    }
+
     private static OffsetDateTime toOffsetDateTime(ZonedDateTime zonedDateTime) {
         return Objects.isNull(zonedDateTime) ? null : zonedDateTime.toOffsetDateTime();
+    }
+
+    private static ZonedDateTime toZonedDateTime(OffsetDateTime offsetDateTime) {
+        return Objects.isNull(offsetDateTime) ? null : offsetDateTime.toZonedDateTime();
     }
 }
