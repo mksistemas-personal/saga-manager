@@ -40,12 +40,13 @@ class StateStepRepositoryDB implements StateStepRepository {
         }
 
         String sql = """
-                INSERT INTO state_step (id, name, description, events, created_at, updated_at, created_by, updated_by)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO state_step (id, name, description, events, deleted, created_at, updated_at, created_by, updated_by)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT (id) DO UPDATE SET
                     name = EXCLUDED.name,
                     description = EXCLUDED.description,
                     events = EXCLUDED.events,
+                    deleted = EXCLUDED.deleted,
                     updated_at = EXCLUDED.updated_at,
                     updated_by = EXCLUDED.updated_by
                 """;
@@ -62,6 +63,7 @@ class StateStepRepositoryDB implements StateStepRepository {
                 .param(stateStep.getName())
                 .param(stateStep.getDescription())
                 .param(eventsStr)
+                .param(stateStep.isDeleted())
                 .param(toOffsetDateTime(stateStep.getCreatedAt()))
                 .param(toOffsetDateTime(stateStep.getUpdatedAt()))
                 .param(stateStep.getCreatedBy())
@@ -94,6 +96,7 @@ class StateStepRepositoryDB implements StateStepRepository {
                 .id(Tsid.from(rs.getLong("id")).toString())
                 .name(rs.getString("name"))
                 .description(rs.getString("description"))
+                .deleted(rs.getBoolean("deleted"))
                 .events(events)
                 .createdAt(toZonedDateTime(rs.getObject("created_at", OffsetDateTime.class)))
                 .updatedAt(toZonedDateTime(rs.getObject("updated_at", OffsetDateTime.class)))
