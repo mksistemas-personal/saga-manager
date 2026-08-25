@@ -90,7 +90,7 @@ class SagaRepositoryDB implements SagaRepository {
         StringBuilder sqlBuilder = new StringBuilder(SQL_SAGA);
         boolean hasName = Objects.nonNull(request) && Objects.nonNull(request.name());
         if (hasName) {
-            sqlBuilder.append(" AND name LIKE :name ");
+            sqlBuilder.append(" AND name ILIKE :name ");
         }
         sqlBuilder.append(" LIMIT :limit OFFSET :offset");
         JdbcClient.StatementSpec queryData = jdbcClient.sql(sqlBuilder.toString());
