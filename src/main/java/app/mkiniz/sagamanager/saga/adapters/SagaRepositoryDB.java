@@ -146,6 +146,24 @@ class SagaRepositoryDB implements SagaRepository {
         return Tsid.from(returnedId);
     }
 
+    @Override
+    public void unlinkStateStep(Tsid sagaId) {
+        String sql = "DELETE FROM saga_step_relationship WHERE saga_id = :sagaId";
+        jdbcClient.sql(sql)
+                .param("sagaId", sagaId.toLong())
+                .update();
+    }
+
+    @Override
+    public boolean existsById(Tsid sagaId) {
+        String sql = "SELECT count(1) FROM saga WHERE id = :id AND deleted = false";
+        Integer count = jdbcClient.sql(sql)
+                .param("id", sagaId.toLong())
+                .query(Integer.class)
+                .single();
+        return Objects.nonNull(count) && count > 0;
+    }
+
     private static OffsetDateTime toOffsetDateTime(ZonedDateTime zonedDateTime) {
         return Objects.isNull(zonedDateTime) ? null : zonedDateTime.toOffsetDateTime();
     }

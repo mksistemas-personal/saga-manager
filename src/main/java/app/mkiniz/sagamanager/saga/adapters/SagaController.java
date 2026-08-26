@@ -1,6 +1,7 @@
 package app.mkiniz.sagamanager.saga.adapters;
 
 import app.mkiniz.sagamanager.saga.LinkStateStepWithSagaUseCase;
+import app.mkiniz.sagamanager.saga.UnlinkStateStepWithSagaUseCase;
 import app.mkiniz.sagamanager.saga.domain.Saga;
 import app.mkiniz.sagamanager.saga.domain.SagaRequest;
 import app.mkiniz.sagamanager.saga.domain.SagaSearchRequest;
@@ -26,6 +27,7 @@ public class SagaController {
     private final GetByIdBusinessUseCase<Tsid, Saga> getByIdSagaUseCase;
     private final GetAllBusinessUseCase<SagaSearchRequest, Maybe<Slice<Saga>>> getAllSagaUseCase;
     private final LinkStateStepWithSagaUseCase linkStateStepUseCase;
+    private final UnlinkStateStepWithSagaUseCase unlinkStateStepUseCase;
 
     @PostMapping
     public ResponseEntity<Saga> add(@RequestBody SagaRequest request) {
@@ -62,6 +64,12 @@ public class SagaController {
     @PostMapping(path = "/link-state-step")
     public ResponseEntity<String> linkStateStep(@RequestParam Tsid sagaId, @RequestParam Tsid stateStepId) {
         Tsid response = linkStateStepUseCase.execute(sagaId, stateStepId);
-        return ResponseEntity.ok(response.toString());
+        return ResponseEntity.ok(response.toLowerCase());
+    }
+
+    @DeleteMapping(path = "/unlink-state-step")
+    public ResponseEntity<String> unlinkStateStep(@RequestParam Tsid sagaId) {
+        Tsid response = unlinkStateStepUseCase.execute(sagaId);
+        return ResponseEntity.ok(response.toLowerCase());
     }
 }
