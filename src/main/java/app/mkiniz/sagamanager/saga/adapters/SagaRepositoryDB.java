@@ -110,6 +110,42 @@ class SagaRepositoryDB implements SagaRepository {
         return new SliceImpl<>(elements, pageable, hasNext);
     }
 
+    @Override
+    public Tsid saveLinkRelationWithStateStep(Tsid sagaId, Tsid stateStepId) {
+        String sql = """
+                WITH old AS (
+                    SELECT id, step_id AS old_step_id
+                    FROM saga_step_relationship
+                    WHERE saga_id = :sagaId
+                ),
+                updated AS (
+                    UPDATE saga_step_relationship r
+                    SET step_id = :stepId, is_valid = true
+                    FROM old
+                    WHERE r.id = old.id
+                    RETURNING r.id
+                ),
+                inserted AS (
+                    INSERT INTO saga_step_relationship (id, saga_id, step_id, is_valid)
+                    SELECT :newId, :sagaId, :stepId, true
+                    WHERE NOT EXISTS (SELECT 1 FROM old)
+                    RETURNING step_id
+                )
+                SELECT old.old_step_id FROM old
+                UNION ALL
+                SELECT step_id FROM inserted;
+                """;
+
+        Long returnedId = jdbcClient.sql(sql)
+                .param("newId", TsidCreator.getTsid().toLong())
+                .param("sagaId", sagaId.toLong())
+                .param("stepId", stateStepId.toLong())
+                .query(Long.class)
+                .single();
+
+        return Tsid.from(returnedId);
+    }
+
     private static OffsetDateTime toOffsetDateTime(ZonedDateTime zonedDateTime) {
         return Objects.isNull(zonedDateTime) ? null : zonedDateTime.toOffsetDateTime();
     }
