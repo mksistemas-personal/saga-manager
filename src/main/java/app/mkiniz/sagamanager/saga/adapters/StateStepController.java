@@ -1,5 +1,6 @@
 package app.mkiniz.sagamanager.saga.adapters;
 
+import app.mkiniz.sagamanager.saga.LinkStateStepToCompositeStepUseCase;
 import app.mkiniz.sagamanager.saga.domain.StateStep;
 import app.mkiniz.sagamanager.saga.domain.StateStepRequest;
 import app.mkiniz.sagamanager.saga.domain.StateStepSearchRequest;
@@ -24,6 +25,7 @@ public class StateStepController {
     private final DeleteBusinessUseCase<Tsid, StateStep> deleteSagaUseCase;
     private final GetByIdBusinessUseCase<Tsid, StateStep> getByIdStateStepUseCase;
     private final GetAllBusinessUseCase<StateStepSearchRequest, Maybe<Slice<StateStep>>> getAllStateStepUseCase;
+    private final LinkStateStepToCompositeStepUseCase linkStateStepToCompositeStepUseCase;
 
     @PostMapping
     public ResponseEntity<StateStep> add(@RequestBody StateStepRequest request) {
@@ -58,5 +60,11 @@ public class StateStepController {
             Pageable pageable) {
         return getAllStateStepUseCase.execute(pageable, new StateStepSearchRequest(name, event))
                 .fold(ResponseEntity::ok, () -> ResponseEntity.noContent().build());
+    }
+
+    @PostMapping(path = "/{id}/add-child-composite")
+    public ResponseEntity<Void> getComposite(@RequestParam Tsid ownerId, @RequestParam Tsid childId) {
+        linkStateStepToCompositeStepUseCase.execute(ownerId, childId);
+        return ResponseEntity.ok().build();
     }
 }

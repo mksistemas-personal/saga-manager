@@ -12,4 +12,10 @@ public interface StateStepRepository {
     Optional<StateStep> findById(Tsid id);
 
     Slice<StateStep> findBySearchRequest(StateStepSearchRequest request, Pageable pageable);
+
+    boolean existsById(Tsid id);
+
+    void linkChildToComposite(Tsid ownerId, Tsid childId);
+
+    boolean existsCompositeLink(Tsid ownerId, Tsid childId);
 }

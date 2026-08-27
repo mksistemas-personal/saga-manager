@@ -144,6 +144,41 @@ class StateStepRepositoryDB implements StateStepRepository {
         return new SliceImpl<>(elements, pageable, hasNext);
     }
 
+    @Override
+    public boolean existsById(Tsid id) {
+        String sql = "SELECT count(1) FROM state_step WHERE id = :id AND deleted = false";
+        Integer count = jdbcClient.sql(sql)
+                .param("id", id.toLong())
+                .query(Integer.class)
+                .single();
+        return Objects.nonNull(count) && count > 0;
+    }
+
+    @Override
+    public void linkChildToComposite(Tsid ownerId, Tsid childId) {
+        String sql = """ 
+                    INSERT INTO composite_state_relationship (id, owner_id, child_id) values(:id, :ownerId, :childId);
+                    UPDATE state_step SET is_composite WHERE id = :ownerId;
+                """;
+
+        jdbcClient.sql(sql)
+                .param("id", TsidCreator.getTsid().toLong())
+                .param("ownerId", ownerId.toLong())
+                .param("childId", childId.toLong())
+                .update();
+    }
+
+    @Override
+    public boolean existsCompositeLink(Tsid ownerId, Tsid childId) {
+        String sql = "SELECT count(1) FROM composite_state_relationship WHERE owner_id = :ownerId AND child_id = :childId";
+        Integer count = jdbcClient.sql(sql)
+                .param("ownerId", ownerId.toLong())
+                .param("childId", childId.toLong())
+                .query(Integer.class)
+                .single();
+        return Objects.nonNull(count) && count > 0;
+    }
+
     private static OffsetDateTime toOffsetDateTime(ZonedDateTime zonedDateTime) {
         return Objects.isNull(zonedDateTime) ? null : zonedDateTime.toOffsetDateTime();
     }

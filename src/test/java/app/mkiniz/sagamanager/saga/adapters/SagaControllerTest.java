@@ -26,6 +26,8 @@ class SagaControllerTest {
     private DeleteBusinessUseCase<Tsid, Saga> deleteSagaUseCase;
     private GetByIdBusinessUseCase<Tsid, Saga> getByIdSagaUseCase;
     private GetAllBusinessUseCase<SagaSearchRequest, Maybe<Slice<Saga>>> getAllSagaUseCase;
+    private app.mkiniz.sagamanager.saga.LinkStateStepWithSagaUseCase linkStateStepWithSagaUseCase;
+    private app.mkiniz.sagamanager.saga.UnlinkStateStepWithSagaUseCase unlinkStateStepWithSagaUseCase;
     private SagaController sagaController;
 
     @BeforeEach
@@ -36,7 +38,9 @@ class SagaControllerTest {
         deleteSagaUseCase = mock(DeleteBusinessUseCase.class);
         getByIdSagaUseCase = mock(GetByIdBusinessUseCase.class);
         getAllSagaUseCase = mock(GetAllBusinessUseCase.class);
-        sagaController = new SagaController(addSagaUseCase, updateSagaUseCase, deleteSagaUseCase, getByIdSagaUseCase, getAllSagaUseCase);
+        linkStateStepWithSagaUseCase = mock(app.mkiniz.sagamanager.saga.LinkStateStepWithSagaUseCase.class);
+        unlinkStateStepWithSagaUseCase = mock(app.mkiniz.sagamanager.saga.UnlinkStateStepWithSagaUseCase.class);
+        sagaController = new SagaController(addSagaUseCase, updateSagaUseCase, deleteSagaUseCase, getByIdSagaUseCase, getAllSagaUseCase, linkStateStepWithSagaUseCase, unlinkStateStepWithSagaUseCase);
     }
 
     @Test
