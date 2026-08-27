@@ -1,7 +1,7 @@
 package app.mkiniz.sagamanager.saga.service;
 
-import app.mkiniz.sagamanager.saga.LinkStateStepToCompositeStepUseCase;
 import app.mkiniz.sagamanager.saga.SagaConstants;
+import app.mkiniz.sagamanager.saga.UnlinkStateStepFromCompositeStepUseCase;
 import app.mkiniz.sagamanager.saga.domain.StateStepRepository;
 import app.mkiniz.sagamanager.shared.business.BusinessException;
 import com.github.f4b6a3.tsid.Tsid;
@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 @AllArgsConstructor
-class LinkStateStepToCompositeStepService implements LinkStateStepToCompositeStepUseCase {
+class UnlinkStateStepFromCompositeStepService implements UnlinkStateStepFromCompositeStepUseCase {
 
     private final StateStepRepository stateStepRepository;
 
@@ -28,7 +28,7 @@ class LinkStateStepToCompositeStepService implements LinkStateStepToCompositeSte
     }
 
     private Either<? extends BusinessException, Context> save(Context context) {
-        stateStepRepository.linkChildToComposite(context.ownerId(), context.childId());
+        stateStepRepository.unlinkChildToComposite(context.ownerId(), context.childId());
         return Either.right(context);
     }
 
@@ -37,8 +37,8 @@ class LinkStateStepToCompositeStepService implements LinkStateStepToCompositeSte
             return Either.left(new BusinessException(SagaConstants.OWNER_STEP_NOT_FOUND));
         if (!stateStepRepository.existsById(context.childId()))
             return Either.left(new BusinessException(SagaConstants.CHILD_STEP_NOT_FOUND));
-        if (stateStepRepository.existsCompositeLink(context.ownerId(), context.childId()))
-            return Either.left(new BusinessException(SagaConstants.CHILD_COMPOSITE_FOUND));
+        if (!stateStepRepository.existsCompositeLink(context.ownerId(), context.childId()))
+            return Either.left(new BusinessException(SagaConstants.CHILD_COMPOSITE_NOT_FOUND));
         return Either.right(context);
     }
 

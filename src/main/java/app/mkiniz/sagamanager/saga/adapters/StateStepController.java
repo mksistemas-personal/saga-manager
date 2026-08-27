@@ -1,6 +1,7 @@
 package app.mkiniz.sagamanager.saga.adapters;
 
 import app.mkiniz.sagamanager.saga.LinkStateStepToCompositeStepUseCase;
+import app.mkiniz.sagamanager.saga.UnlinkStateStepFromCompositeStepUseCase;
 import app.mkiniz.sagamanager.saga.domain.StateStep;
 import app.mkiniz.sagamanager.saga.domain.StateStepRequest;
 import app.mkiniz.sagamanager.saga.domain.StateStepSearchRequest;
@@ -26,6 +27,7 @@ public class StateStepController {
     private final GetByIdBusinessUseCase<Tsid, StateStep> getByIdStateStepUseCase;
     private final GetAllBusinessUseCase<StateStepSearchRequest, Maybe<Slice<StateStep>>> getAllStateStepUseCase;
     private final LinkStateStepToCompositeStepUseCase linkStateStepToCompositeStepUseCase;
+    private final UnlinkStateStepFromCompositeStepUseCase unlinkStateStepFromCompositeStepUseCase;
 
     @PostMapping
     public ResponseEntity<StateStep> add(@RequestBody StateStepRequest request) {
@@ -62,9 +64,15 @@ public class StateStepController {
                 .fold(ResponseEntity::ok, () -> ResponseEntity.noContent().build());
     }
 
-    @PostMapping(path = "/{id}/add-child-composite")
-    public ResponseEntity<Void> getComposite(@RequestParam Tsid ownerId, @RequestParam Tsid childId) {
+    @PostMapping(path = "/link-child-composite")
+    public ResponseEntity<Void> linkChildToComposite(@RequestParam Tsid ownerId, @RequestParam Tsid childId) {
         linkStateStepToCompositeStepUseCase.execute(ownerId, childId);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping(path = "/unlink-child-composite")
+    public ResponseEntity<Void> unlinkChildToComposite(@RequestParam Tsid ownerId, @RequestParam Tsid childId) {
+        unlinkStateStepFromCompositeStepUseCase.execute(ownerId, childId);
         return ResponseEntity.ok().build();
     }
 }

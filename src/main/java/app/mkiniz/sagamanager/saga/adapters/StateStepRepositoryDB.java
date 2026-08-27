@@ -158,7 +158,7 @@ class StateStepRepositoryDB implements StateStepRepository {
     public void linkChildToComposite(Tsid ownerId, Tsid childId) {
         String sql = """ 
                     INSERT INTO composite_state_relationship (id, owner_id, child_id) values(:id, :ownerId, :childId);
-                    UPDATE state_step SET is_composite WHERE id = :ownerId;
+                    UPDATE state_step SET is_composite = true WHERE id = :ownerId;
                 """;
 
         jdbcClient.sql(sql)
@@ -177,6 +177,25 @@ class StateStepRepositoryDB implements StateStepRepository {
                 .query(Integer.class)
                 .single();
         return Objects.nonNull(count) && count > 0;
+    }
+
+    @Override
+    public void unlinkChildToComposite(Tsid ownerId, Tsid childId) {
+        String sql = """ 
+                    DELETE FROM composite_state_relationship WHERE owner_id = :ownerId AND child_id = :childId;
+                    UPDATE state_step SET is_composite = FALSE
+                    WHERE id = :ownerId
+                      AND NOT EXISTS (
+                          SELECT 1
+                          FROM composite_state_relationship csr
+                          WHERE csr.owner_id = :ownerId
+                      );
+                """;
+
+        jdbcClient.sql(sql)
+                .param("ownerId", ownerId.toLong())
+                .param("childId", childId.toLong())
+                .update();
     }
 
     private static OffsetDateTime toOffsetDateTime(ZonedDateTime zonedDateTime) {

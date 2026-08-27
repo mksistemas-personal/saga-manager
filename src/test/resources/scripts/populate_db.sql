@@ -15,6 +15,9 @@ VALUES (880536525792825260, 'HubInt-DocumentoCarga-Recebido', 'Documento de carg
         'DocumentoCargaEnviado', false, CURRENT_TIMESTAMP, 'system', CURRENT_TIMESTAMP, 'system'),
        (880536525792825263, 'TmsOpe-DocumentoCarga-Inserido-DocumentoTransporte',
         'Documento de carga inserido no Documento de Transporte', false, 'DocumentoCargaInserido', false,
+        CURRENT_TIMESTAMP, 'system', CURRENT_TIMESTAMP, 'system'),
+       (880536525792825264, 'Documento-Carga-Agrupado',
+        'Documento de carga agrupado', false, null, false,
         CURRENT_TIMESTAMP, 'system', CURRENT_TIMESTAMP, 'system');
 
 
