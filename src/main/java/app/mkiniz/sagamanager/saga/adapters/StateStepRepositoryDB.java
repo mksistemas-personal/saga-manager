@@ -144,6 +144,89 @@ class StateStepRepositoryDB implements StateStepRepository {
         return new SliceImpl<>(elements, pageable, hasNext);
     }
 
+    @Override
+    public boolean existsById(Tsid id) {
+        String sql = "SELECT exists(SELECT 1 FROM state_step WHERE id = :id AND deleted = false)";
+        return jdbcClient.sql(sql)
+                .param("id", id.toLong())
+                .query(Boolean.class)
+                .single();
+    }
+
+    @Override
+    public void linkChildToComposite(Tsid ownerId, Tsid childId) {
+        String sql = """ 
+                    INSERT INTO composite_state_relationship (id, owner_id, child_id) values(:id, :ownerId, :childId);
+                    UPDATE state_step SET is_composite = true WHERE id = :ownerId;
+                """;
+
+        jdbcClient.sql(sql)
+                .param("id", TsidCreator.getTsid().toLong())
+                .param("ownerId", ownerId.toLong())
+                .param("childId", childId.toLong())
+                .update();
+    }
+
+    @Override
+    public boolean existsCompositeLink(Tsid ownerId, Tsid childId) {
+        String sql = "SELECT exists(SELECT 1 FROM composite_state_relationship WHERE owner_id = :ownerId AND child_id = :childId)";
+        return jdbcClient.sql(sql)
+                .param("ownerId", ownerId.toLong())
+                .param("childId", childId.toLong())
+                .query(Boolean.class)
+                .single();
+    }
+
+    @Override
+    public void unlinkChildToComposite(Tsid ownerId, Tsid childId) {
+        String sql = """ 
+                    DELETE FROM composite_state_relationship WHERE owner_id = :ownerId AND child_id = :childId;
+                    UPDATE state_step SET is_composite = FALSE
+                    WHERE id = :ownerId
+                      AND NOT EXISTS (
+                          SELECT 1
+                          FROM composite_state_relationship csr
+                          WHERE csr.owner_id = :ownerId
+                      );
+                """;
+
+        jdbcClient.sql(sql)
+                .param("ownerId", ownerId.toLong())
+                .param("childId", childId.toLong())
+                .update();
+    }
+
+    @Override
+    public boolean existsStateStepRelationship(Tsid sourceId, Tsid destId) {
+        String sql = "SELECT exists(SELECT 1 FROM step_relationship WHERE source_id = :sourceId and dest_id = :destId)";
+        return jdbcClient.sql(sql)
+                .param("sourceId", sourceId.toLong())
+                .param("destId", destId.toLong())
+                .query(Boolean.class)
+                .single();
+    }
+
+    @Override
+    public Tsid linkStateStepWithStateStep(Tsid sourceId, Tsid destId) {
+        String sql = "INSERT INTO step_relationship (id, source_id, dest_id) VALUES (:id, :sourceId, :destId)";
+        jdbcClient.sql(sql)
+                .param("id", TsidCreator.getTsid().toLong())
+                .param("sourceId", sourceId.toLong())
+                .param("destId", destId.toLong())
+                .update();
+        return sourceId;
+    }
+
+    @Override
+    public Tsid unlinkStateStepWithStateStep(Tsid sourceId, Tsid destId) {
+        String sql = "DELETE FROM step_relationship WHERE source_id = :sourceId and dest_id = :destId";
+        jdbcClient.sql(sql)
+                .param("sourceId", sourceId.toLong())
+                .param("destId", destId.toLong())
+                .update();
+        return sourceId;
+    }
+
     private static OffsetDateTime toOffsetDateTime(ZonedDateTime zonedDateTime) {
         return Objects.isNull(zonedDateTime) ? null : zonedDateTime.toOffsetDateTime();
     }

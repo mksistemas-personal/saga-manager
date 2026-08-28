@@ -1,4 +1,4 @@
-package app.mkiniz.sagamanager.adapters;
+package app.mkiniz.sagamanager.saga.adapters;
 
 import app.mkiniz.sagamanager.saga.adapters.SagaRepositoryDB;
 import app.mkiniz.sagamanager.saga.domain.Saga;

@@ -10,6 +10,12 @@ public interface SagaRepository {
     Saga save(Saga saga);
 
     Optional<Saga> findById(Tsid id);
-    
+
     Slice<Saga> findBySearchRequest(SagaSearchRequest request, Pageable pageable);
+
+    Tsid saveLinkRelationWithStateStep(Tsid sagaId, Tsid stateStepId);
+
+    void unlinkStateStep(Tsid sagaId);
+
+    boolean existsById(Tsid sagaId);
 }
