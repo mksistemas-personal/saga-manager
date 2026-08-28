@@ -1,7 +1,9 @@
 package app.mkiniz.sagamanager.saga.adapters;
 
 import app.mkiniz.sagamanager.saga.LinkStateStepToCompositeStepUseCase;
+import app.mkiniz.sagamanager.saga.LinkStateStepWithStateStepUseCase;
 import app.mkiniz.sagamanager.saga.UnlinkStateStepFromCompositeStepUseCase;
+import app.mkiniz.sagamanager.saga.UnlinkStateStepWithStateStepUseCase;
 import app.mkiniz.sagamanager.saga.domain.StateStep;
 import app.mkiniz.sagamanager.saga.domain.StateStepRequest;
 import app.mkiniz.sagamanager.saga.domain.StateStepSearchRequest;
@@ -28,6 +30,8 @@ public class StateStepController {
     private final GetAllBusinessUseCase<StateStepSearchRequest, Maybe<Slice<StateStep>>> getAllStateStepUseCase;
     private final LinkStateStepToCompositeStepUseCase linkStateStepToCompositeStepUseCase;
     private final UnlinkStateStepFromCompositeStepUseCase unlinkStateStepFromCompositeStepUseCase;
+    private final LinkStateStepWithStateStepUseCase linkStateStepWithStateStepUseCase;
+    private final UnlinkStateStepWithStateStepUseCase unlinkStateStepWithStateStepUseCase;
 
     @PostMapping
     public ResponseEntity<StateStep> add(@RequestBody StateStepRequest request) {
@@ -73,6 +77,18 @@ public class StateStepController {
     @DeleteMapping(path = "/unlink-child-composite")
     public ResponseEntity<Void> unlinkChildToComposite(@RequestParam Tsid ownerId, @RequestParam Tsid childId) {
         unlinkStateStepFromCompositeStepUseCase.execute(ownerId, childId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping(path = "/link-step")
+    public ResponseEntity<Tsid> linkStateStepToStateStep(@RequestParam Tsid sourceId, @RequestParam Tsid destId) {
+        Tsid id = linkStateStepWithStateStepUseCase.execute(sourceId, destId);
+        return ResponseEntity.ok(id);
+    }
+
+    @DeleteMapping(path = "/unlink-step")
+    public ResponseEntity<Void> unlinkStateStepToStateStep(@RequestParam Tsid sourceId, @RequestParam Tsid destId) {
+        unlinkStateStepWithStateStepUseCase.execute(sourceId, destId);
         return ResponseEntity.ok().build();
     }
 }

@@ -20,4 +20,10 @@ public interface StateStepRepository {
     boolean existsCompositeLink(Tsid ownerId, Tsid childId);
 
     void unlinkChildToComposite(Tsid ownerId, Tsid childId);
+
+    boolean existsStateStepRelationship(Tsid sourceId, Tsid destId);
+
+    Tsid linkStateStepWithStateStep(Tsid sourceId, Tsid destId);
+
+    Tsid unlinkStateStepWithStateStep(Tsid sourceId, Tsid destId);
 }

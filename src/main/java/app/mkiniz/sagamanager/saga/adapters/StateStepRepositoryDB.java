@@ -146,12 +146,11 @@ class StateStepRepositoryDB implements StateStepRepository {
 
     @Override
     public boolean existsById(Tsid id) {
-        String sql = "SELECT count(1) FROM state_step WHERE id = :id AND deleted = false";
-        Integer count = jdbcClient.sql(sql)
+        String sql = "SELECT exists(SELECT 1 FROM state_step WHERE id = :id AND deleted = false)";
+        return jdbcClient.sql(sql)
                 .param("id", id.toLong())
-                .query(Integer.class)
+                .query(Boolean.class)
                 .single();
-        return Objects.nonNull(count) && count > 0;
     }
 
     @Override
@@ -170,13 +169,12 @@ class StateStepRepositoryDB implements StateStepRepository {
 
     @Override
     public boolean existsCompositeLink(Tsid ownerId, Tsid childId) {
-        String sql = "SELECT count(1) FROM composite_state_relationship WHERE owner_id = :ownerId AND child_id = :childId";
-        Integer count = jdbcClient.sql(sql)
+        String sql = "SELECT exists(SELECT 1 FROM composite_state_relationship WHERE owner_id = :ownerId AND child_id = :childId)";
+        return jdbcClient.sql(sql)
                 .param("ownerId", ownerId.toLong())
                 .param("childId", childId.toLong())
-                .query(Integer.class)
+                .query(Boolean.class)
                 .single();
-        return Objects.nonNull(count) && count > 0;
     }
 
     @Override
@@ -196,6 +194,37 @@ class StateStepRepositoryDB implements StateStepRepository {
                 .param("ownerId", ownerId.toLong())
                 .param("childId", childId.toLong())
                 .update();
+    }
+
+    @Override
+    public boolean existsStateStepRelationship(Tsid sourceId, Tsid destId) {
+        String sql = "SELECT exists(SELECT 1 FROM step_relationship WHERE source_id = :sourceId and dest_id = :destId)";
+        return jdbcClient.sql(sql)
+                .param("sourceId", sourceId.toLong())
+                .param("destId", destId.toLong())
+                .query(Boolean.class)
+                .single();
+    }
+
+    @Override
+    public Tsid linkStateStepWithStateStep(Tsid sourceId, Tsid destId) {
+        String sql = "INSERT INTO step_relationship (id, source_id, dest_id) VALUES (:id, :sourceId, :destId)";
+        jdbcClient.sql(sql)
+                .param("id", TsidCreator.getTsid().toLong())
+                .param("sourceId", sourceId.toLong())
+                .param("destId", destId.toLong())
+                .update();
+        return sourceId;
+    }
+
+    @Override
+    public Tsid unlinkStateStepWithStateStep(Tsid sourceId, Tsid destId) {
+        String sql = "DELETE FROM step_relationship WHERE source_id = :sourceId and dest_id = :destId";
+        jdbcClient.sql(sql)
+                .param("sourceId", sourceId.toLong())
+                .param("destId", destId.toLong())
+                .update();
+        return sourceId;
     }
 
     private static OffsetDateTime toOffsetDateTime(ZonedDateTime zonedDateTime) {
