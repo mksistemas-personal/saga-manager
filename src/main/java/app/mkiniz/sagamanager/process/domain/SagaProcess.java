@@ -1,6 +1,5 @@
-package app.mkiniz.sagamanager.saga.domain;
+package app.mkiniz.sagamanager.process.domain;
 
-import app.mkiniz.sagamanager.shared.entity.AbstractAuditable;
 import com.github.f4b6a3.tsid.Tsid;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,9 +12,9 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class Saga extends AbstractAuditable {
+public class SagaProcess {
     private Tsid id;
     private String name;
-    private String description;
-    private boolean deleted;
+    private StateStepProcess startStep;
+
 }

@@ -1,4 +1,4 @@
-package app.mkiniz.sagamanager.saga.service;
+package app.mkiniz.sagamanager.saga.services;
 
 import app.mkiniz.sagamanager.saga.domain.Saga;
 import app.mkiniz.sagamanager.saga.domain.SagaRepository;

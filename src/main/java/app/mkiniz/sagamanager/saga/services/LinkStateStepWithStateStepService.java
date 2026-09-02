@@ -1,4 +1,4 @@
-package app.mkiniz.sagamanager.saga.service;
+package app.mkiniz.sagamanager.saga.services;
 
 import app.mkiniz.sagamanager.saga.LinkStateStepWithStateStepUseCase;
 import app.mkiniz.sagamanager.saga.SagaConstants;

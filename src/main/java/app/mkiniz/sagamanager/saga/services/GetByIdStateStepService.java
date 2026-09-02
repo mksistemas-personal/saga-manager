@@ -1,10 +1,10 @@
-package app.mkiniz.sagamanager.saga.service;
+package app.mkiniz.sagamanager.saga.services;
 
 import app.mkiniz.sagamanager.saga.SagaConstants;
 import app.mkiniz.sagamanager.saga.domain.StateStep;
 import app.mkiniz.sagamanager.saga.domain.StateStepRepository;
 import app.mkiniz.sagamanager.shared.business.BusinessException;
-import app.mkiniz.sagamanager.shared.business.DeleteBusinessUseCase;
+import app.mkiniz.sagamanager.shared.business.GetByIdBusinessUseCase;
 import com.github.f4b6a3.tsid.Tsid;
 import cyclops.control.Either;
 import lombok.AllArgsConstructor;
@@ -12,9 +12,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @AllArgsConstructor
-class DeleteStateStepService implements DeleteBusinessUseCase<Tsid, StateStep> {
+class GetByIdStateStepService implements GetByIdBusinessUseCase<Tsid, StateStep> {
 
     private final StateStepRepository stateStepRepository;
 
@@ -22,8 +22,7 @@ class DeleteStateStepService implements DeleteBusinessUseCase<Tsid, StateStep> {
     public StateStep execute(Tsid id) {
         return (StateStep) Either.<BusinessException, Tsid>right(id)
                 .flatMap(this::findById)
-                .flatMap(this::save)
-                .fold(this::throwBusinessException, saga -> saga);
+                .fold(this::throwBusinessException, step -> step);
     }
 
     private Either<? extends BusinessException, StateStep> findById(Tsid id) {
@@ -31,12 +30,4 @@ class DeleteStateStepService implements DeleteBusinessUseCase<Tsid, StateStep> {
                 .map(Either::<BusinessException, StateStep>right)
                 .orElseGet(() -> Either.left(new BusinessException(SagaConstants.STEP_NOT_FOUND)));
     }
-
-    private Either<? extends BusinessException, StateStep> save(StateStep stateStep) {
-        stateStep.setDeleted(true);
-        stateStep.fillToUpdate();
-        return Either.right(stateStepRepository.save(stateStep));
-    }
-
-
 }
